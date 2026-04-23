@@ -5,14 +5,18 @@ sources:
     url: https://www.theguardian.com/world/rss
     enabled: true
 
-  - name: Reuters
-    url: https://feeds.reuters.com/reuters/topNews
+  # Reuters dropped public RSS (feeds.reuters.com DNS gone, reuters.com RSS returns 401).
+  # Replaced with NPR Top Stories — official first-party feed, broad US and world coverage.
+  - name: NPR News
+    url: https://feeds.npr.org/1001/rss.xml
     enabled: true
 
   - name: BBC News
     url: http://feeds.bbci.co.uk/news/rss.xml
     enabled: true
 
-  - name: Associated Press
-    url: https://rsshub.app/ap/topics/apf-topnews
+  # AP News dropped public RSS (all apnews.com RSS endpoints redirect to HTML).
+  # Replaced with Al Jazeera — official first-party feed, strong international coverage.
+  - name: Al Jazeera
+    url: https://www.aljazeera.com/xml/rss/all.xml
     enabled: true
