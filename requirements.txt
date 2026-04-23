@@ -1,3 +1,6 @@
 sqlalchemy
 pytest
 readchar
+feedparser
+pyyaml
+beautifulsoup4
