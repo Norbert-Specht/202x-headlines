@@ -152,6 +152,27 @@ def test_project_id_isolation(repo):
     assert b_candidates[0].source_url == "http://example.com/b"
 
 
+def test_multi_reason_rejection(repo):
+    """
+    Rejecting with two categories should store both as a comma-separated
+    string in rejection_reason, and persist the optional note in reviewer_notes.
+
+    This mirrors what review.py does: it joins selected short_keys with ", "
+    before passing them to repo.reject().
+    """
+    article = make_candidate(repo)
+
+    rejected = repo.reject(
+        article_id=article.id,
+        reason="not_absurd_enough, wrong_kind_of_dark",
+        notes="Depressing story about factory closures — no wit, no absurdity.",
+    )
+
+    assert rejected.status == "rejected"
+    assert rejected.reviews[0].rejection_reason == "not_absurd_enough, wrong_kind_of_dark"
+    assert "no wit" in rejected.reviews[0].reviewer_notes
+
+
 def test_get_accepted_by_year_filters_correctly(repo):
     """
     get_accepted_by_year should return only articles whose publication_year
