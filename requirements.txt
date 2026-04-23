@@ -4,3 +4,4 @@ readchar
 feedparser
 pyyaml
 beautifulsoup4
+requests

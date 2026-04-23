@@ -150,6 +150,43 @@ class ArticleRepository:
         self.session.flush()
         return article
 
+    def set_filter_result(
+        self,
+        article_id: int,
+        score: float | None,
+        rationale: str | None,
+        flags: list[str],
+    ) -> Article:
+        """
+        Persist the full LLM filter result for an article in one call.
+
+        Updates filter_score, filter_rationale, and filter_flags together
+        so the three fields are always written atomically.
+
+        Parameters
+        ----------
+        article_id : Primary key of the article to update.
+        score      : Float in [0.0, 1.0], or None if scoring failed.
+        rationale  : One or two sentence explanation from the model.
+        flags      : List of flag strings from the fixed vocabulary.
+                     Stored as a comma-separated string internally.
+
+        Returns
+        -------
+        Article
+            The updated Article instance.
+        """
+        article = self.session.get(Article, article_id)
+
+        article.filter_score = score
+        article.filter_rationale = rationale
+        # Join the list into a comma-separated string for storage.
+        # Empty list is stored as None rather than an empty string.
+        article.filter_flags = ",".join(flags) if flags else None
+
+        self.session.flush()
+        return article
+
     def set_filter_score(self, article_id: int, score: float) -> Article:
         """
         Persist the LLM relevance score for an article.

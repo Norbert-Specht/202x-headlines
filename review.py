@@ -89,6 +89,9 @@ def print_article(article, position: int, total: int) -> None:
     """
     Print the formatted article block for a single review item.
 
+    Shows the filter score and rationale when present so editors can make
+    faster decisions without reading every source URL.
+
     Parameters
     ----------
     article  : An Article ORM instance.
@@ -104,6 +107,27 @@ def print_article(article, position: int, total: int) -> None:
     print(f"Source   : {article.source_name or '—'}")
     print(f"URL      : {article.source_url}")
     print(f"Scraped  : {scraped}")
+
+    # ------------------------------------------------------------------ #
+    # Filter score line — shown only when the filter has run              #
+    # ------------------------------------------------------------------ #
+
+    if article.filter_score is not None:
+        # Parse the comma-separated flags string back into a display list.
+        if article.filter_flags:
+            flags_display = "[" + ", ".join(article.filter_flags.split(",")) + "]"
+        else:
+            flags_display = ""
+        score_line = f"{article.filter_score:.2f}"
+        if flags_display:
+            score_line = f"{score_line}  {flags_display}"
+        print(f"Score    : {score_line}")
+
+        if article.filter_rationale:
+            print(f"Rationale: \"{article.filter_rationale}\"")
+    else:
+        print(f"Score    : not yet scored")
+
     print(DIVIDER)
     print("[a] Accept   [r] Reject   [s] Skip   [q] Quit")
 

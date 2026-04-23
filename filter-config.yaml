@@ -1,0 +1,7 @@
+project_id: 202x-headlines
+model: mistral:7b
+ollama_url: http://localhost:11434
+
+# Minimum score for an article to surface prominently in the review queue.
+# Not enforced by the filter itself yet — stored here for future use.
+score_threshold: 0.6

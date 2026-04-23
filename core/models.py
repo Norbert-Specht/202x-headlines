@@ -82,6 +82,16 @@ class Article(Base):
     # human review. High scores bubble up in the review queue.
     filter_score = Column(Float, nullable=True)
 
+    # One or two sentence explanation from the LLM for the score given.
+    # Surfaced in the review UI so editors understand why an article was
+    # flagged as a strong or weak candidate.
+    filter_rationale = Column(Text, nullable=True)
+
+    # Comma-separated list of flags from the fixed vocabulary, e.g.
+    # "dark-wit,capitalism-relevant". Stored denormalised to avoid a
+    # separate join table for a small, bounded set of values.
+    filter_flags = Column(String, nullable=True)
+
     # ------------------------------------------------------------------ #
     # Timestamps                                                           #
     # ------------------------------------------------------------------ #
