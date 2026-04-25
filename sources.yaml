@@ -20,3 +20,10 @@ sources:
   - name: Al Jazeera
     url: https://www.aljazeera.com/xml/rss/all.xml
     enabled: true
+
+# Reddit sources — fetched by reddit_scraper.py via the public JSON API.
+# Each entry requires a subreddit name (no /r/ prefix) and an enabled flag.
+reddit_sources:
+  - name: r/nottheonion
+    subreddit: nottheonion
+    enabled: true
