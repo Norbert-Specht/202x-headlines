@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Character encoding declared first — must precede any content characters -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>202x Headlines</title>
+    <!-- style.css lives alongside this file in dist/ — filled in during visual design phase -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Page header                                                         -->
+    <!-- ------------------------------------------------------------------ -->
+    <header>
+        <h1>202x Headlines</h1>
+        <p class="tagline">Real news headlines so absurd they function as accidental satire.</p>
+        <p class="note">Every headline is sourced and real. The absurdity is in the record.</p>
+    </header>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Year index — one link per available year, newest first             -->
+    <!-- ------------------------------------------------------------------ -->
+    <main>
+        <nav aria-label="Archive by year">
+            <ul class="year-list">
+{{YEAR_LIST}}
+            </ul>
+        </nav>
+    </main>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Footer                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <footer>
+        <p>{{TOTAL_COUNT}} headlines archived across {{YEAR_COUNT}} year{{YEAR_PLURAL}}.</p>
+    </footer>
+
+</body>
+</html>

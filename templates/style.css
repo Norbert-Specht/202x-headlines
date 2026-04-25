@@ -1,0 +1,28 @@
+/*
+ * 202x Headlines — Stylesheet
+ *
+ * Near-empty by design. Visual styling is handled manually as a separate
+ * phase. This file is copied to dist/ on every build so the <link> tag
+ * in the templates resolves correctly.
+ *
+ * Add styles here when the visual design phase begins.
+ */
+
+
+/* -------------------------------------------------------------------------
+ * Base reset
+ * A minimal reset so the raw HTML looks readable before styling.
+ * ------------------------------------------------------------------------- */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    /* System font stack — no external font dependency until design phase */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}

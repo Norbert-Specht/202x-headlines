@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Character encoding declared first — must precede any content characters -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{YEAR}} — 202x Headlines</title>
+    <!-- style.css lives alongside this file in dist/ — filled in during visual design phase -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Page header                                                         -->
+    <!-- ------------------------------------------------------------------ -->
+    <header>
+        <!-- Back link to the year index -->
+        <nav aria-label="Breadcrumb">
+            <a href="index.html">← All years</a>
+        </nav>
+        <h1>{{YEAR}}</h1>
+    </header>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Headline list — ordered, most recently published first             -->
+    <!-- Each item links to the original article; opens in a new tab        -->
+    <!-- rel="noopener noreferrer" prevents the new tab from accessing      -->
+    <!-- window.opener (a standard security precaution for external links)  -->
+    <!-- ------------------------------------------------------------------ -->
+    <main>
+        <ol class="headline-list">
+{{HEADLINE_LIST}}
+        </ol>
+    </main>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Footer                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <footer>
+        <p>{{HEADLINE_COUNT}} headline{{HEADLINE_PLURAL}} in {{YEAR}}.</p>
+        <p><a href="index.html">← Back to all years</a></p>
+    </footer>
+
+</body>
+</html>
