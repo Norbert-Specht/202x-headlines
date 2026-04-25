@@ -16,7 +16,7 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 | M3b | ✅ | LLM filter — `filter.py`, Ollama/mistral:7b candidate scoring |
 | M4 | ✅ | Data model — filter score, rationale, flags fields; migration script |
 | M5a | ✅ | Reddit scraper — `reddit_scraper.py`, r/nottheonion, public JSON API |
-| M5b | 🔲 | Flask frontend — year-based archive, candidate review UI |
+| M5b | ✅ | Static site generator — `build.py`, `templates/`, outputs `dist/` |
 | M5c | 🔲 | Scheduler — automated daily scrape + filter run |
 | M6 | 🔲 | Deployment — hosted archive, public URL |
 
@@ -33,6 +33,8 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 ├── reddit_scraper.py   # Reddit scraper — r/nottheonion via public JSON API
 ├── filter.py           # LLM filter — scores candidates using Ollama/mistral:7b
 ├── review.py           # Review CLI — keyboard-driven accept/reject interface
+├── build.py            # Static site generator — writes dist/ from accepted articles
+├── templates/          # HTML templates and style.css (substituted by build.py)
 ├── sources.yaml        # RSS and Reddit source config with enabled flags
 └── filter-config.yaml  # Filter thresholds and prompt config
 ```
@@ -67,6 +69,9 @@ python filter.py
 
 # 4. Review and accept/reject in the terminal
 python review.py
+
+# 5. Build the static site (outputs to dist/)
+python build.py
 ```
 
 ---
