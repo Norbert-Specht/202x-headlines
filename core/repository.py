@@ -291,6 +291,10 @@ class ArticleRepository:
         front end. Uses the indexed publication_year column, not a datetime
         range, for efficiency.
 
+        Each returned Article includes all content fields: headline,
+        source_url, excerpt, and image_url (nullable — not all articles have
+        a header image). Callers should guard against image_url being None.
+
         Parameters
         ----------
         project_id : Project namespace to filter by.

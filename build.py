@@ -94,27 +94,38 @@ def render_year_list_item(year: int, count: int) -> str:
     return f'                <li><a href="{year}.html">{year} — {count} {noun}</a></li>'
 
 
-def render_headline_item(headline: str, source_url: str) -> str:
+def render_headline_item(headline: str, source_url: str, image_url: str | None = None) -> str:
     """
     Render one <li> entry for a year page headline list.
+
+    When image_url is provided, a bare <img> tag is prepended to the link
+    inside the list item. Styling is left to style.css — no inline styles
+    are applied here.
 
     Parameters
     ----------
     headline   : The article headline text. HTML-escaped before insertion.
     source_url : The original article URL.
+    image_url  : Optional header image URL. Omitted entirely when None.
 
     Returns
     -------
     str
-        An indented <li> element containing a link to the original article.
+        An indented <li> element containing an optional image and a link.
     """
     # Escape headline text to prevent any stray < > & characters from
     # breaking the HTML — headlines scraped from the web can contain anything.
     safe_headline = html.escape(headline)
+
+    # Build the optional image tag. alt="" marks it as decorative so screen
+    # readers skip it — the headline link is the meaningful content.
+    img_tag = f'<img src="{html.escape(image_url)}" alt="">' if image_url else ""
+
     # target="_blank" opens the article in a new tab so the archive stays open.
     # rel="noopener noreferrer" is a security standard for external new-tab links.
     return (
         f'            <li>'
+        f'{img_tag}'
         f'<a href="{source_url}" target="_blank" rel="noopener noreferrer">'
         f'{safe_headline}'
         f'</a></li>'
@@ -169,7 +180,7 @@ def build(db_path: Path = _DB_PATH) -> dict:
         for article in articles:
             if article.publication_year is not None:
                 by_year[article.publication_year].append(
-                    (article.headline, article.source_url)
+                    (article.headline, article.source_url, article.image_url)
                 )
 
     # Sort years descending (newest first) for both index and navigation.
@@ -201,7 +212,8 @@ def build(db_path: Path = _DB_PATH) -> dict:
         headlines = by_year[year]
         # Headlines are already ordered newest-first by get_accepted().
         headline_items = "\n".join(
-            render_headline_item(headline, url) for headline, url in headlines
+            render_headline_item(headline, url, image_url)
+            for headline, url, image_url in headlines
         )
         count = len(headlines)
         plural = "" if count == 1 else "s"

@@ -23,7 +23,9 @@
 
     <!-- ------------------------------------------------------------------ -->
     <!-- Headline list — ordered, most recently published first             -->
-    <!-- Each item links to the original article; opens in a new tab        -->
+    <!-- Each <li> is rendered by build.py and contains:                    -->
+    <!--   <img src="..."> (omitted when no image_url is stored)            -->
+    <!--   <a href="..."> headline text </a>                                -->
     <!-- rel="noopener noreferrer" prevents the new tab from accessing      -->
     <!-- window.opener (a standard security precaution for external links)  -->
     <!-- ------------------------------------------------------------------ -->
