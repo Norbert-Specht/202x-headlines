@@ -210,6 +210,10 @@ def build(db_path: Path = _DB_PATH) -> dict:
 
     for year in sorted_years:
         headlines = by_year[year]
+        # TODO: Fallback image — articles with no image_url currently render without an image.
+        # A project-specific fallback image (e.g. static/fallback.jpg) needs to be designed
+        # and added before deployment. Update render_headline_item() to use it when image_url is None.
+
         # Headlines are already ordered newest-first by get_accepted().
         headline_items = "\n".join(
             render_headline_item(headline, url, image_url)
