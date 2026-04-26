@@ -18,6 +18,7 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 | M5a | ✅ | Reddit scraper — `reddit_scraper.py`, r/nottheonion, public JSON API |
 | M5b | ✅ | Static site generator — `build.py`, `templates/`, outputs `dist/` |
 | M5b-i | ✅ | `image_url` added to Article model, scrapers, and migration script |
+| M5b-ii | ✅ | Images surfaced in static site; `add.py` manual URL submission tool |
 | M5c | 🔲 | Scheduler — automated daily scrape + filter run |
 | M6 | 🔲 | Deployment — hosted archive, public URL |
 
@@ -35,6 +36,7 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 ├── filter.py           # LLM filter — scores candidates using Ollama/mistral:7b
 ├── review.py           # Review CLI — keyboard-driven accept/reject interface
 ├── build.py            # Static site generator — writes dist/ from accepted articles
+├── add.py              # Manual submission — fetch a URL and add it directly as accepted
 ├── migrate_add_image_url.py  # Idempotent migration — adds image_url column
 ├── templates/          # HTML templates and style.css (substituted by build.py)
 ├── sources.yaml        # RSS and Reddit source config with enabled flags
@@ -75,6 +77,17 @@ python review.py
 # 5. Build the static site (outputs to dist/)
 python build.py
 ```
+
+### Manual article submission
+
+To add a single article directly (bypasses scraper and filter):
+
+```bash
+python add.py https://example.com/some-absurd-headline
+```
+
+Extracts `og:title`, `og:image`, `og:url`, and `article:published_time` from the page.
+Duplicate URLs are detected and reported without error.
 
 ---
 
