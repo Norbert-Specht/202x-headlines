@@ -61,6 +61,11 @@ class Article(Base):
     # need to open the original link for every candidate.
     excerpt = Column(Text, nullable=True)
 
+    # Header image URL scraped from the feed entry or Reddit thumbnail.
+    # Nullable — not all sources provide images, and missing images are
+    # handled gracefully in the frontend rather than blocking ingestion.
+    image_url = Column(String, nullable=True)
+
     # ------------------------------------------------------------------ #
     # Pipeline state                                                       #
     # ------------------------------------------------------------------ #

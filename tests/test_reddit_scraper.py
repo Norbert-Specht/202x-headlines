@@ -162,6 +162,7 @@ def test_scrape_reddit_adds_new_and_skips_duplicates(tmp_path):
             source_name="r/test",
             excerpt=None,
             date_scraped=datetime(2025, 1, 1),
+            image_url=None,
         )
 
     # ------------------------------------------------------------------ #
@@ -181,8 +182,8 @@ def test_scrape_reddit_adds_new_and_skips_duplicates(tmp_path):
     # Mock fetch_reddit_posts to return controlled entries                 #
     # ------------------------------------------------------------------ #
     fake_posts = [
-        {"headline": "New Post",       "source_url": "https://example.com/new",     "excerpt": None, "date_scraped": datetime(2025, 6, 1)},
-        {"headline": "Already Stored", "source_url": "https://example.com/already", "excerpt": None, "date_scraped": datetime(2025, 6, 1)},
+        {"headline": "New Post",       "source_url": "https://example.com/new",     "excerpt": None, "image_url": None, "date_scraped": datetime(2025, 6, 1)},
+        {"headline": "Already Stored", "source_url": "https://example.com/already", "excerpt": None, "image_url": None, "date_scraped": datetime(2025, 6, 1)},
     ]
 
     with patch("reddit_scraper.fetch_reddit_posts", return_value=fake_posts), \

@@ -156,6 +156,7 @@ def test_scrape_adds_new_and_skips_duplicates(tmp_path):
             source_name="Test Feed A",
             excerpt=None,
             date_scraped=datetime(2025, 1, 1),
+            image_url=None,
         )
 
     # ------------------------------------------------------------------ #
@@ -177,11 +178,11 @@ def test_scrape_adds_new_and_skips_duplicates(tmp_path):
     # Mock fetch_feed to return controlled entries per source              #
     # ------------------------------------------------------------------ #
     feed_a_entries = [
-        {"headline": "New from A",       "source_url": "http://example.com/new-a",    "excerpt": None, "date_scraped": datetime(2025, 6, 1)},
-        {"headline": "Already Stored",   "source_url": "http://example.com/already",  "excerpt": None, "date_scraped": datetime(2025, 6, 1)},
+        {"headline": "New from A",       "source_url": "http://example.com/new-a",    "excerpt": None, "image_url": None, "date_scraped": datetime(2025, 6, 1)},
+        {"headline": "Already Stored",   "source_url": "http://example.com/already",  "excerpt": None, "image_url": None, "date_scraped": datetime(2025, 6, 1)},
     ]
     feed_b_entries = [
-        {"headline": "New from B",       "source_url": "http://example.com/new-b",    "excerpt": None, "date_scraped": datetime(2025, 6, 1)},
+        {"headline": "New from B",       "source_url": "http://example.com/new-b",    "excerpt": None, "image_url": None, "date_scraped": datetime(2025, 6, 1)},
     ]
 
     def fake_fetch_feed(source):

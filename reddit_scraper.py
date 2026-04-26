@@ -125,6 +125,7 @@ def fetch_reddit_posts(source: dict) -> list[dict]:
         headline    (str)       — the post title
         source_url  (str)       — the external article URL (not the Reddit permalink)
         excerpt     (str | None)— always None for link posts (no body text)
+        image_url   (str | None)— thumbnail URL if Reddit provided a real one
         date_scraped (datetime) — UTC time of this scrape run
 
     Network and HTTP errors are caught and logged; an empty list is returned
@@ -186,12 +187,22 @@ def fetch_reddit_posts(source: dict) -> list[dict]:
         if not headline:
             continue
 
+        # ------------------------------------------------------------------ #
+        # Extract thumbnail image URL                                        #
+        # ------------------------------------------------------------------ #
+        # Reddit populates 'thumbnail' with a real URL, or with placeholder
+        # strings like 'self', 'default', 'nsfw', or 'spoiler'. Only use it
+        # if it looks like a real HTTP URL.
+        raw_thumbnail = post.get("thumbnail", "")
+        image_url = raw_thumbnail if raw_thumbnail.startswith("http") else None
+
         posts.append({
             "headline": headline,
             "source_url": source_url,
             # r/nottheonion is a link-only subreddit — selftext is always empty.
             # Storing None keeps the schema consistent with RSS candidates.
             "excerpt": None,
+            "image_url": image_url,
             # Use current UTC time (not Reddit's created_utc) so we know when
             # this article entered our pipeline, consistent with the RSS scraper.
             "date_scraped": now,
@@ -297,6 +308,7 @@ def scrape_reddit(
                     source_name=name,
                     excerpt=post["excerpt"],
                     date_scraped=post["date_scraped"],
+                    image_url=post.get("image_url"),
                 )
                 source_added += 1
 

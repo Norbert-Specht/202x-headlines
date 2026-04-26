@@ -44,6 +44,7 @@ class ArticleRepository:
         source_name: str | None,
         excerpt: str | None,
         date_scraped: datetime,
+        image_url: str | None = None,
     ) -> Article:
         """
         Create a new article in "candidate" status and persist it.
@@ -56,6 +57,8 @@ class ArticleRepository:
         source_name  : Human-readable outlet name, e.g. "Reuters".
         excerpt      : Lede or first paragraph, used in the review UI.
         date_scraped : When the scraper first fetched this URL.
+        image_url    : Header image URL from the feed or Reddit thumbnail.
+                       None if the source did not provide an image.
 
         Returns
         -------
@@ -69,6 +72,7 @@ class ArticleRepository:
             source_name=source_name,
             excerpt=excerpt,
             date_scraped=date_scraped,
+            image_url=image_url,
             status="candidate",
         )
         self.session.add(article)

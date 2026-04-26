@@ -118,6 +118,51 @@ def _strip_html(raw: str) -> str:
     return " ".join(text.split())
 
 
+def _extract_image_url(entry) -> str | None:
+    """
+    Extract a header image URL from an RSS feed entry.
+
+    Checks three common RSS media extension fields in priority order:
+      1. media_content  — explicit image metadata (Media RSS extension)
+      2. enclosures     — standard RSS 2.0 binary attachment mechanism
+      3. media_thumbnail — lower-resolution preview image
+
+    Only http/https URLs are accepted. The first valid URL found is returned.
+
+    Parameters
+    ----------
+    entry : A feedparser entry object (supports .get() dict-style access).
+
+    Returns
+    -------
+    str | None
+        The first valid image URL found, or None if none is present.
+    """
+    # media_content is a list of dicts; each may have 'url', 'type', 'medium'.
+    for item in entry.get("media_content", []):
+        url = item.get("url", "").strip()
+        if url.startswith("http"):
+            return url
+
+    # enclosures is the standard RSS 2.0 attachment list; each item has
+    # 'href', 'type', and 'length'. Only accept explicitly image-typed entries
+    # so we don't accidentally store audio or video URLs as image_url.
+    for enc in entry.get("enclosures", []):
+        url = (enc.get("href") or enc.get("url") or "").strip()
+        mime = enc.get("type", "")
+        if url.startswith("http") and mime.startswith("image/"):
+            return url
+
+    # media_thumbnail is a list of dicts with a 'url' key — lower priority
+    # than media_content but widely used as a feed preview image.
+    for item in entry.get("media_thumbnail", []):
+        url = item.get("url", "").strip()
+        if url.startswith("http"):
+            return url
+
+    return None
+
+
 def fetch_feed(source: dict) -> list[dict]:
     """
     Fetch and parse the RSS feed for a single source.
@@ -126,6 +171,7 @@ def fetch_feed(source: dict) -> list[dict]:
         headline    (str)           — the entry title
         source_url  (str)           — the entry link
         excerpt     (str | None)    — first 300 chars of summary, HTML stripped
+        image_url   (str | None)    — header image URL if present in the feed
         date_scraped (datetime)     — UTC time of this scrape run (not pub date)
 
     Entries with no URL are silently skipped.
@@ -192,6 +238,7 @@ def fetch_feed(source: dict) -> list[dict]:
             "headline": headline,
             "source_url": source_url,
             "excerpt": excerpt,
+            "image_url": _extract_image_url(entry),
             # Use the current UTC time, not the feed's published date, so we
             # know when this article entered our pipeline.
             "date_scraped": now,
@@ -299,6 +346,7 @@ def scrape(
                     source_name=name,
                     excerpt=entry["excerpt"],
                     date_scraped=entry["date_scraped"],
+                    image_url=entry.get("image_url"),
                 )
                 source_added += 1
 

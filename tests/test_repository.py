@@ -50,6 +50,7 @@ def make_candidate(repo: ArticleRepository, project_id="test-project", url="http
         source_name="The Daily Obvious",
         excerpt="Researchers have once again verified solar temperatures.",
         date_scraped=datetime(2025, 6, 1, 12, 0, 0),
+        image_url=None,
     )
 
 
