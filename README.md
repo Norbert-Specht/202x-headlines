@@ -17,6 +17,7 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 | M4 | ✅ | Data model — filter score, rationale, flags fields; migration script |
 | M5a | ✅ | Reddit scraper — `reddit_scraper.py`, r/nottheonion, public JSON API |
 | M5b | ✅ | Static site generator — `build.py`, `templates/`, outputs `dist/` |
+| M5b-i | ✅ | `image_url` added to Article model, scrapers, and migration script |
 | M5c | 🔲 | Scheduler — automated daily scrape + filter run |
 | M6 | 🔲 | Deployment — hosted archive, public URL |
 
@@ -34,6 +35,7 @@ Each headline is sourced, scraped, reviewed, and published — not invented. The
 ├── filter.py           # LLM filter — scores candidates using Ollama/mistral:7b
 ├── review.py           # Review CLI — keyboard-driven accept/reject interface
 ├── build.py            # Static site generator — writes dist/ from accepted articles
+├── migrate_add_image_url.py  # Idempotent migration — adds image_url column
 ├── templates/          # HTML templates and style.css (substituted by build.py)
 ├── sources.yaml        # RSS and Reddit source config with enabled flags
 └── filter-config.yaml  # Filter thresholds and prompt config
