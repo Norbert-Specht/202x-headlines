@@ -7,14 +7,17 @@ back to the database. Sits between the scraper and the review tool.
 
 Usage:
     python filter.py
+    python filter.py --export-rationales   # also writes filter_report.txt
 
 Requires Ollama to be running locally with mistral:7b available:
     ollama serve
     ollama pull mistral:7b
 """
 
+import argparse
 import json
 import warnings
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
@@ -35,6 +38,13 @@ _DEFAULT_CONFIG_PATH = _PROJECT_ROOT / "filter-config.yaml"
 _DEFAULT_DB_PATH = _PROJECT_ROOT / "data" / "articles.db"
 
 _DIVIDER = "─" * 43
+
+# Divider used inside the filter report file — slightly shorter than the
+# terminal divider so the file reads cleanly in a text editor at any width.
+_REPORT_DIVIDER = "─" * 40
+
+# Output path for the optional rationale export.
+_REPORT_PATH = _PROJECT_ROOT / "filter_report.txt"
 
 
 # --------------------------------------------------------------------------- #
@@ -215,12 +225,101 @@ def _extract_json(text: str) -> dict | None:
 
 
 # --------------------------------------------------------------------------- #
+# Report export                                                                #
+# --------------------------------------------------------------------------- #
+
+def write_filter_report(engine, project_id: str, report_path: Path) -> int:
+    """
+    Write a plain-text report of all scored candidates to report_path.
+
+    Queries every candidate article that has a filter_score (i.e. has been
+    scored by the LLM), sorts them by score descending, and writes one
+    block per article showing score, source, headline, URL, flags, and
+    rationale. A header line at the top records the timestamp and total count.
+
+    Parameters
+    ----------
+    engine      : SQLAlchemy engine connected to the project database.
+    project_id  : Project ID string used to scope the repository query.
+    report_path : File path where the report will be written. Overwrites any
+                  existing file at that path.
+
+    Returns
+    -------
+    int
+        Number of scored articles included in the report.
+    """
+    # ------------------------------------------------------------------ #
+    # Fetch all scored candidates                                          #
+    # ------------------------------------------------------------------ #
+
+    with get_session(engine) as session:
+        repo = ArticleRepository(session)
+        all_candidates = repo.get_candidates(project_id=project_id)
+
+        # Keep only articles that have been through the filter.
+        scored = [a for a in all_candidates if a.filter_score is not None]
+
+        # Collect all display fields while the session is still open —
+        # ORM objects become detached after the context manager exits.
+        entries = [
+            {
+                "score":       a.filter_score,
+                "source_name": a.source_name or "unknown",
+                "headline":    a.headline,
+                "source_url":  a.source_url,
+                # filter_flags is stored as a comma-separated string or None.
+                "flags":       a.filter_flags or "—",
+                "rationale":   a.filter_rationale or "",
+            }
+            for a in scored
+        ]
+
+    # ------------------------------------------------------------------ #
+    # Sort and format                                                      #
+    # ------------------------------------------------------------------ #
+
+    # Most promising candidates first — makes the report useful for prompt
+    # calibration without having to scroll past low scorers.
+    entries.sort(key=lambda e: e["score"], reverse=True)
+
+    n = len(entries)
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    noun = "article" if n == 1 else "articles"
+
+    lines: list[str] = [
+        f"Filter Report — {timestamp} — {n} {noun} scored",
+        "",
+    ]
+
+    for entry in entries:
+        lines.append(_REPORT_DIVIDER)
+        lines.append(f"SCORE: {entry['score']:.2f}  |  SOURCE: {entry['source_name']}")
+        lines.append(f"HEADLINE: {entry['headline']}")
+        lines.append(f"URL: {entry['source_url']}")
+        lines.append(f"FLAGS: {entry['flags']}")
+        lines.append(f"RATIONALE: {entry['rationale']}")
+        lines.append("")
+
+    lines.append(_REPORT_DIVIDER)
+
+    # ------------------------------------------------------------------ #
+    # Write file                                                           #
+    # ------------------------------------------------------------------ #
+
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+
+    return n
+
+
+# --------------------------------------------------------------------------- #
 # Filter run                                                                   #
 # --------------------------------------------------------------------------- #
 
 def run_filter(
     config_path: str | Path = _DEFAULT_CONFIG_PATH,
     db_path: str | Path = _DEFAULT_DB_PATH,
+    export_rationales: bool = False,
 ) -> dict:
     """
     Run the LLM filter over all unscored candidate articles for the project.
@@ -229,10 +328,15 @@ def run_filter(
     to the configured Ollama model, and writes the score, rationale, and
     flags back to the database using ArticleRepository.set_filter_result.
 
+    When export_rationales is True, writes a plain-text report of all scored
+    articles (including those scored in previous runs) to filter_report.txt
+    in the project root after the filter run completes.
+
     Parameters
     ----------
-    config_path : Path to filter-config.yaml. Defaults to project root.
-    db_path     : Path to the SQLite database. Defaults to data/articles.db.
+    config_path        : Path to filter-config.yaml. Defaults to project root.
+    db_path            : Path to the SQLite database. Defaults to data/articles.db.
+    export_rationales  : When True, write filter_report.txt after the run.
 
     Returns
     -------
@@ -359,6 +463,16 @@ def run_filter(
     print(f"Done. Processed: {processed}   Errors: {errors}   Skipped: {skipped}")
     print()
 
+    # ------------------------------------------------------------------ #
+    # Optional rationale export                                            #
+    # ------------------------------------------------------------------ #
+
+    if export_rationales:
+        n = write_filter_report(engine, project_id, _REPORT_PATH)
+        noun = "entry" if n == 1 else "entries"
+        print(f"Filter report written → {_REPORT_PATH.name}  ({n} {noun})")
+        print()
+
     return {"processed": processed, "errors": errors, "skipped": skipped}
 
 
@@ -367,4 +481,17 @@ def run_filter(
 # --------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    run_filter()
+    parser = argparse.ArgumentParser(
+        description="LLM candidate filter for the 202x Headlines pipeline.",
+    )
+    parser.add_argument(
+        "--export-rationales",
+        action="store_true",
+        # Writes filter_report.txt to the project root after the run.
+        # Includes all scored candidates (not just this run) sorted by
+        # score descending — useful for prompt calibration and review.
+        help="Write a scored-article report to filter_report.txt after the run.",
+    )
+    args = parser.parse_args()
+
+    run_filter(export_rationales=args.export_rationales)
